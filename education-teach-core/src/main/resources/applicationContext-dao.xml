@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:component-scan base-package="cn.teach.core.*"/>
+    <context:property-placeholder location="classpath*:properties/*.properties" file-encoding="utf-8"/>
+
+    <!-- define the SqlSessionFactory -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean" >
+        <property name="dataSource" ref="dataSource" />
+        <property name="typeAliasesPackage"
+                  value="cn.teach.core.dao.entities,cn.teach.facade.vo.out" />
+        <property name="mapperLocations" value="classpath*:mapper/*Mapper.xml"/>
+        <property name="configLocation" value="classpath:mybatis-config.xml"/>
+    </bean>
+
+    <!-- scan for mappers and let them be autowired -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!--<property name="annotationClass" value="org.springframework.stereotype.Repository" />-->
+        <property name="basePackage" value="cn.teach.core.dao" />
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true"/>
+
+    <!-- 数据源，配置来源pom.xml -->
+    <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="${jndi.dataSource}" />
+    </bean>
+    <!-- transaction manager, use JtaTransactionManager for global tx -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+   <!-- <Resource auth="Container"
+              driverClassName="com.mysql.jdbc.Driver"
+              maxActive="40"
+              maxIdle="10"
+              maxWait="20000"
+              name="jndi/teachdb"
+              password="nanMI2016"
+              type="javax.sql.DataSource"
+              url="jdbc:mysql://99.48.70.202:3306/teachdb"
+              username="root" />-->
+</beans>
